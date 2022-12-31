@@ -1,32 +1,36 @@
 #
 # Conditional build:
 %bcond_with	doc	# Sphinx documentation, TODO: fix this
-%bcond_with	tests	# unit tests
+%bcond_with	tests	# unit tests (2 failures)
 
 %define		module	networkx
 Summary:	High-productivity software for complex networks
 Summary(pl.UTF-8):	Efektywne operacje na skomplikowanych grafach
 Name:		python-%{module}
-Version:	2.5
-Release:	4
+Version:	2.2
+Release:	1
 License:	BSD
 Group:		Libraries/Python
-Source0:	https://pypi.python.org/packages/source/n/networkx/%{module}-%{version}.tar.gz
-# Source0-md5:	21f25be1f4373e19153a9beca63346e7
+#Source0Download: https://pypi.org/simple/networkx/
+Source0:	https://pypi.python.org/packages/source/n/networkx/%{module}-%{version}.zip
+# Source0-md5:	82608a3686fb3e61f20cf13bfd3c1b4a
 URL:		http://networkx.github.io/index.html
-BuildRequires:	python3-modules >= 1:3.6
-BuildRequires:	python3-setuptools
+BuildRequires:	python-modules >= 1:2.7
+BuildRequires:	python-setuptools
 %if %{with tests}
-BuildRequires:	python3-decorator >= 4.3.0
+BuildRequires:	python-decorator >= 4.3
+BuildRequires:	python-nose >= 0.10.1
 %endif
 BuildRequires:	rpm-pythonprov
 BuildRequires:	rpmbuild(macros) >= 1.714
+BuildRequires:	unzip
 %if %{with doc}
-BuildRequires:	python3-nb2plots
-BuildRequires:	python3-sphinx-gallery
-BuildRequires:	python3-texext
-BuildRequires:	sphinx-pdg-3 >= 1.3
+BuildRequires:	python-nb2plots
+BuildRequires:	python-sphinx-gallery
+BuildRequires:	python-texext
+BuildRequires:	sphinx-pdg-2 >= 1.3
 %endif
+Requires:	python-modules >= 1:2.7
 BuildArch:	noarch
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
@@ -35,20 +39,6 @@ Python language software package for the creation, manipulation, and
 study of the structure, dynamics, and functions of complex networks.
 
 %description -l pl.UTF-8
-Pakiet oprogramowania do tworzenia, manipulacji i badania struktury
-dynamiki i funkcji złożonych sieci.
-
-%package -n python3-%{module}
-Summary:	High-productivity software for complex networks
-Summary(pl.UTF-8):	Efektywne operacje na skomplikowanych grafach
-Group:		Libraries/Python
-Requires:	python3-modules
-
-%description -n python3-%{module}
-Python language software package for the creation, manipulation, and
-study of the structure, dynamics, and functions of complex networks.
-
-%description -n python3-%{module} -l pl.UTF-8
 Pakiet oprogramowania do tworzenia, manipulacji i badania struktury
 dynamiki i funkcji złożonych sieci.
 
@@ -67,35 +57,37 @@ Dokumentacja API modułu Pythona %{module}.
 %setup -q -n %{module}-%{version}
 
 %build
-%py3_build
+%py_build %{?with_tests:test}
 
 %if %{with doc}
 PYTHONPATH=$(pwd) \
 %{__make} -C doc html \
-	SPHINXBUILD=sphinx-build-3
+	SPHINXBUILD=sphinx-build-2
 %endif
 
 %install
 rm -rf $RPM_BUILD_ROOT
 
-%py3_install
+%py_install
 
-install -d $RPM_BUILD_ROOT%{_examplesdir}/python3-%{module}-%{version}
-cp -a examples/* $RPM_BUILD_ROOT%{_examplesdir}/python3-%{module}-%{version}
-find $RPM_BUILD_ROOT%{_examplesdir}/python3-%{module}-%{version} -name '*.py' \
-	| xargs sed -i '1s|^#!.*python\b|#!%{__python3}|'
+%py_postclean
+
+install -d $RPM_BUILD_ROOT%{_examplesdir}/python-%{module}-%{version}
+cp -a examples/* $RPM_BUILD_ROOT%{_examplesdir}/python-%{module}-%{version}
+find $RPM_BUILD_ROOT%{_examplesdir}/python-%{module}-%{version} -name '*.py' \
+	| xargs sed -i '1s|^#!.*python\b|#!%{__python}|'
 
 %{__rm} -r $RPM_BUILD_ROOT%{_docdir}/%{module}-%{version}
 
 %clean
 rm -rf $RPM_BUILD_ROOT
 
-%files -n python3-%{module}
+%files
 %defattr(644,root,root,755)
-%doc README.rst
-%{py3_sitescriptdir}/%{module}
-%{py3_sitescriptdir}/%{module}-*.egg-info
-%{_examplesdir}/python3-%{module}-%{version}
+%doc CONTRIBUTORS.rst LICENSE.txt README.rst
+%{py_sitescriptdir}/networkx
+%{py_sitescriptdir}/networkx-%{version}-py*.egg-info
+%{_examplesdir}/python-%{module}-%{version}
 
 %if %{with doc}
 %files apidocs
