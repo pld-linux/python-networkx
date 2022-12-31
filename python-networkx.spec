@@ -12,7 +12,7 @@ Release:	1
 License:	BSD
 Group:		Libraries/Python
 #Source0Download: https://pypi.org/simple/networkx/
-Source0:	https://pypi.python.org/packages/source/n/networkx/%{module}-%{version}.zip
+Source0:	https://files.pythonhosted.org/packages/source/n/networkx/%{module}-%{version}.zip
 # Source0-md5:	82608a3686fb3e61f20cf13bfd3c1b4a
 URL:		http://networkx.github.io/index.html
 BuildRequires:	python-modules >= 1:2.7
